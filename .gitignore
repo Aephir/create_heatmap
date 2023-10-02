@@ -1,5 +1,6 @@
 data/*
-!data/example*
+!data/example.csv
+!data/example_heatmap.png
 *.png
 test.py
 venv
