@@ -1,4 +1,6 @@
 data/*
+!data/
 *.png
 test.py
 venv
+.idea
