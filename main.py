@@ -6,6 +6,20 @@ from matplotlib.colors import LinearSegmentedColormap
 from math import log10 , floor
 
 
+def main():
+    files = [
+        # "data/fj1_analogs.csv",
+        # "data/constomatin_screen.csv",
+        # ... [Add more files as required]
+        "data/example.csv"
+    ]
+
+    for file in files:
+        df_color, df_info = read_and_prepare_data(file)
+        fig, ax = plot_heatmap(df_color, df_info)
+        output_path = file.replace('.csv', '_heatmap.png')
+        save_and_show(fig, output_path)
+
 def round_it(val, type, significant=2):
     try:
         if type == "pEC50":
@@ -157,21 +171,6 @@ def plot_heatmap(df_color, df_info):
 def save_and_show(fig, output_path):
     fig.savefig(output_path, dpi=300, transparent=True, bbox_inches="tight")
     plt.show()
-
-
-def main():
-    files = [
-        # "data/fj1_analogs.csv",
-        # "data/constomatin_screen.csv",
-        # ... [Add more files as required]
-        "data/example.csv"
-    ]
-
-    for file in files:
-        df_color, df_info = read_and_prepare_data(file)
-        fig, ax = plot_heatmap(df_color, df_info)
-        output_path = file.replace('.csv', '_heatmap.png')
-        save_and_show(fig, output_path)
 
 
 if __name__ == '__main__':
