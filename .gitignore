@@ -1,5 +1,5 @@
 data/*
-!data/
+!data/example.csv
 *.png
 test.py
 venv
