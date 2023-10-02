@@ -161,9 +161,10 @@ def save_and_show(fig, output_path):
 
 def main():
     files = [
-        "data/fj1_analogs.csv",
-        "data/constomatin_screen.csv",
+        # "data/fj1_analogs.csv",
+        # "data/constomatin_screen.csv",
         # ... [Add more files as required]
+        "data/example.csv"
     ]
 
     for file in files:
