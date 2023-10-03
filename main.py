@@ -8,7 +8,8 @@ from math import log10, floor
 
 def main():
     files = [
-        "data/example.csv",
+        # "data/example.csv",
+        "data/fj1_analogs.csv"
     ]
 
     for file in files:
@@ -22,34 +23,36 @@ def round_it(val, type_of_value, significant=2):
     try:
         if type_of_value == "pEC50":
             rounded_val = round(val, significant - int(floor(log10(abs(val)))))
-        else:
-            rounded_val = round(val, significant - int(floor(log10(abs(val)))) - 1)
-        if 10 <= rounded_val:
-            if type_of_value == "pEC50":
-                rounded_val = "{:.1f}".format(rounded_val)
-            elif type_of_value == "EC50":
-                rounded_val = str(int(rounded_val))
+        else:  # EC50
+            # Adjust the significant digits for EC50
+            if 0 < val < 1:
+                # The minimum number of decimal places is 2 when val < 1.
+                dec_places = max(2, significant - int(floor(log10(abs(val)))) - 1)
+            elif 1 <= val < 10:
+                # For 1 <= val < 10, always show 1 decimal place
+                dec_places = 1
+            else:
+                dec_places = significant - int(floor(log10(abs(val)))) - 1
+            rounded_val = round(val, dec_places)
 
-        # Use this for 2 decimals when number >10
-        # if 10 <= rounded_val < 11:
-        #     format_str = "{:." + str(significant) + "f}"
-        #     return format_str.format(rounded_val)
-        # elif rounded_val >= 11:
-        #     return str(int(rounded_val))
+        # Formatting
+        if type_of_value == "EC50":
+            # Ensure that the rounded_val has the correct number of decimal places by formatting it as a string.
+            rounded_val_str = f"{rounded_val:.{dec_places}f}"
+            # When rounded_val is 10 or greater, do not show decimal places
+            if rounded_val >= 10:
+                rounded_val_str = f"{int(rounded_val)}"
+            return rounded_val_str
 
-        elif rounded_val < 10:
-            format_str = "{:." + str(significant) + "f}"
-            rounded_val = format_str.format(rounded_val)
-        else:
-            rounded_val = str(rounded_val)
+        return str(rounded_val)
+
     except ValueError:  # Catch non-numeric values
         if type_of_value == "EC50":
-            rounded_val = ">10,000"
+            return ">10,000"
         elif type_of_value == "pEC50":
-            rounded_val = "<5"
+            return "<5"
         else:  # type_of_value == "SEM":
-            rounded_val = ""
-    return str(rounded_val)
+            return ""
 
 
 def text_color_for_bg(bg_color):
@@ -62,7 +65,6 @@ def text_color_for_bg(bg_color):
 
     # Calculate brightness
     brightness = (0.299 * r) + (0.587 * g) + (0.114 * b)
-    # print(brightness)
 
     # Return white for dark backgrounds, black otherwise
     return "white" if brightness < 128 else "black"

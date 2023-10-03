@@ -3,5 +3,6 @@ data/*
 !data/example_heatmap.png
 *.png
 test.py
+test_simple.py
 venv
 .idea
