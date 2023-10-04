@@ -6,3 +6,7 @@ test.py
 test_simple.py
 venv
 .idea
+gui.py
+gui.spec
+build
+dist

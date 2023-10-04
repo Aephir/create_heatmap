@@ -4,23 +4,24 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from math import log10, floor
+from typing import Union, Any
+from pandas import DataFrame
 
-print(type(round))
-print(round.__module__)
-def main():
-    files = [
-        # "data/example.csv",
-        "data/fj1_analogs.csv"
-    ]
+files: list[str] = [
+    # "data/example.csv",
+    "data/fj1_analogs.csv"
+]
 
-    for file in files:
+
+def main(file_list: list[str]) -> None:
+    for file in file_list:
         df_color, df_info = read_and_prepare_data(file)
         fig, ax = plot_heatmap(df_color, df_info)
         output_path = file.replace(".csv", "_heatmap.png")
         save_and_show(fig, output_path)
 
 
-def round_to_sf(number, sf):
+def round_to_sf(number: Union[int, float, np.number], sf: int) -> Union[int, float]:
     """
     Round the given number to specified significant figures (sf).
 
@@ -39,14 +40,14 @@ def round_to_sf(number, sf):
         return round(number / scale_factor, sf - 1) * scale_factor
 
 
-def round_it(val, type_of_value, significant=2):
+def round_it(val: Union[int, float, np.number], type_of_value: str, significant: int = 2) -> str:
     try:
-        if type_of_value == "pEC50":
+        if type_of_value == "pec50":
             rounded_val = round(val, significant - int(floor(log10(abs(val)))))
             # Always format with one decimal place
             return f"{rounded_val:.2f}"
-        else:  # EC50
-            # Adjust the significant digits for EC50
+        else:  # ec50
+            # Adjust the significant digits for ec50
             if 0 < val < 1:
                 # The minimum number of decimal places is 2 when val < 1.
                 dec_places = max(2, significant - int(floor(log10(abs(val)))) - 1)
@@ -62,7 +63,7 @@ def round_it(val, type_of_value, significant=2):
             rounded_val = round(val, dec_places)
 
         # Formatting
-        if type_of_value == "EC50":
+        if type_of_value == "ec50":
             # Ensure that the rounded_val has the correct number of decimal places by formatting it as a string.
             rounded_val_str = f"{rounded_val:.{dec_places}f}"
             # When rounded_val is 10 or greater, do not show decimal places
@@ -73,22 +74,21 @@ def round_it(val, type_of_value, significant=2):
         return str(rounded_val)
 
     except ValueError:  # Catch non-numeric values
-        if type_of_value == "EC50":
+        if type_of_value == "ec50":
             return ">10,000"
-        elif type_of_value == "pEC50":
+        elif type_of_value == "pec50":
             return "<5"
         else:  # type_of_value == "SEM":
             return ""
 
 
-
-def text_color_for_bg(bg_color):
+def text_color_for_bg(bg_color: str) -> str:
     if bg_color == "#000000":  # Assuming 'none' is the color passed for NaN cells
         bg_color = "#D3D3D3"
 
     # Convert the hex color to RGB values
     bg_color = bg_color[1:]  # Remove the '#' at the start
-    r, g, b = tuple(int(bg_color[i : i + 2], 16) for i in (0, 2, 4))
+    r, g, b = tuple(int(bg_color[i: i + 2], 16) for i in (0, 2, 4))
 
     # Calculate brightness
     brightness = (0.299 * r) + (0.587 * g) + (0.114 * b)
@@ -97,28 +97,28 @@ def text_color_for_bg(bg_color):
     return "white" if brightness < 128 else "black"
 
 
-def read_and_prepare_data(file_path):
+def read_and_prepare_data(file_path: str):
     # Read the CSV
-    data = pd.read_csv(file_path, sep="\t", header=None)
+    data: DataFrame | Any = pd.read_csv(file_path, sep="\t", header=None)
 
     # Extract compound names
-    compounds = data[0].tolist()
+    compounds: list = data[0].tolist()
 
     # Extract data lists
-    pEC50_numeric = data.iloc[:, 1::3].replace("NaN", np.nan).astype(float).values
-    SEM_list = data.iloc[:, 2::3].replace("NaN", np.nan).astype(float).values
+    pec50_numeric = data.iloc[:, 1::3].replace("NaN", np.nan).astype(float).values
+    sem_list = data.iloc[:, 2::3].replace("NaN", np.nan).astype(float).values
     n_array = data.iloc[:, 3::3].replace("NaN", np.nan).values
     n_list = np.where(np.isnan(n_array), np.nan, n_array.astype(int))
 
     # Create array for heatmap annotations
     data_info = []
-    for pEC50_row, SEM_row, n_row in zip(pEC50_numeric, SEM_list, n_list):
+    for pec50_row, sem_row, n_row in zip(pec50_numeric, sem_list, n_list):
         row_info = []
-        for pEC50, SEM, n in zip(pEC50_row, SEM_row, n_row):
-            # Convert pEC50 to EC50
-            ec50_value = pow(10, -1 * pEC50) * 1000000000
-            ec50_str = round_it(ec50_value, "EC50")
-            pEC50_str = round_it(pEC50, "pEC50")
+        for pec50, SEM, n in zip(pec50_row, sem_row, n_row):
+            # Convert pec50 to ec50
+            ec50_value = pow(10, -1 * pec50) * 1000000000
+            ec50_str = round_it(ec50_value, "ec50")
+            pec50_str = round_it(pec50, "pec50")
             SEM_str = round_it(SEM, "SEM")
             try:
                 n = int(n)
@@ -126,14 +126,14 @@ def read_and_prepare_data(file_path):
                 pass
 
             if SEM_str:  # If SEM_str is not empty
-                row_info.append(f"{ec50_str}\n{pEC50_str}±{SEM_str} (n={n})")
+                row_info.append(f"{ec50_str}\n{pec50_str}±{SEM_str} (n={n})")
             else:
-                row_info.append(f"{ec50_str}\n{pEC50_str}")
+                row_info.append(f"{ec50_str}\n{pec50_str}")
         data_info.append(row_info)
 
     # Convert arrays to DataFrames
     df_color = pd.DataFrame(
-        pEC50_numeric, columns=["SST1", "SST2", "SST3", "SST4", "SST5"], index=compounds
+        pec50_numeric, columns=["SST1", "SST2", "SST3", "SST4", "SST5"], index=compounds
     )
     df_info = pd.DataFrame(
         data_info, columns=["SST1", "SST2", "SST3", "SST4", "SST5"], index=compounds
@@ -223,4 +223,4 @@ def save_and_show(fig, output_path):
 
 
 if __name__ == "__main__":
-    main()
+    main(files)
