@@ -43,6 +43,8 @@ def round_it(val, type_of_value, significant=2):
     try:
         if type_of_value == "pEC50":
             rounded_val = round(val, significant - int(floor(log10(abs(val)))))
+            # Always format with one decimal place
+            return f"{rounded_val:.2f}"
         else:  # EC50
             # Adjust the significant digits for EC50
             if 0 < val < 1:
@@ -77,6 +79,7 @@ def round_it(val, type_of_value, significant=2):
             return "<5"
         else:  # type_of_value == "SEM":
             return ""
+
 
 
 def text_color_for_bg(bg_color):
