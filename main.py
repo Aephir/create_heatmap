@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from math import log10, floor
 
-
+print(type(round))
+print(round.__module__)
 def main():
     files = [
         # "data/example.csv",
@@ -17,6 +18,25 @@ def main():
         fig, ax = plot_heatmap(df_color, df_info)
         output_path = file.replace(".csv", "_heatmap.png")
         save_and_show(fig, output_path)
+
+
+def round_to_sf(number, sf):
+    """
+    Round the given number to specified significant figures (sf).
+
+    Parameters:
+        number (float): The number to be rounded.
+        sf (int): The number of significant figures.
+
+    Returns:
+        float: Rounded number.
+    """
+    if number == 0:
+        return 0
+    else:
+        order_of_magnitude = floor(log10(abs(number)))
+        scale_factor = 10 ** order_of_magnitude
+        return round(number / scale_factor, sf - 1) * scale_factor
 
 
 def round_it(val, type_of_value, significant=2):
@@ -32,7 +52,11 @@ def round_it(val, type_of_value, significant=2):
                 # For 1 <= val < 10, always show 1 decimal place
                 dec_places = 1
             else:
-                dec_places = significant - int(floor(log10(abs(val)))) - 1
+                # For val >= 10, use round_to_sf
+                rounded_val = round_to_sf(val, significant)
+                # Ensure the type is float before calling is_integer
+                return str(int(rounded_val)) if float(rounded_val).is_integer() else str(rounded_val)
+
             rounded_val = round(val, dec_places)
 
         # Formatting
