@@ -7,7 +7,8 @@ from math import log10, floor
 
 files = [
     # "data/example.csv",
-    "data/fj1_analogs.csv"
+    "data/fj1_analogs_ci95.csv",
+    # "data/consomatin_screen_ci95.csv"
 ]
 
 
@@ -19,23 +20,11 @@ def create_heatmap(file_list, significant_digits=2, pec50_empty="<5", ec50_empty
         save_and_show(fig, output_path)
 
 
-def round_to_sf(number, sf):
-    """
-    Round the given number to specified significant figures (sf).
-
-    Parameters:
-        number (float): The number to be rounded.
-        sf (int): The number of significant figures.
-
-    Returns:
-        float: Rounded number.
-    """
+def round_to_sf(number, significant_figures):
     if number == 0:
         return 0
     else:
-        order_of_magnitude = floor(log10(abs(number)))
-        scale_factor = 10 ** order_of_magnitude
-        return round(number / scale_factor, sf - 1) * scale_factor
+        return round(number, significant_figures - int(floor(log10(abs(number)))) - 1)
 
 
 def round_it(val, type_of_value, significant, pec50_empty, ec50_empty):
@@ -45,31 +34,28 @@ def round_it(val, type_of_value, significant, pec50_empty, ec50_empty):
             # Always format with one decimal place
             return f"{rounded_val:.2f}"
         else:  # EC50
-            # Adjust the significant digits for EC50
-            if 0 < val < 1:
-                # The minimum number of decimal places is 2 when val < 1.
+            # Here we only change EC50 rounding to tackle floating point errors
+            # Use round_to_sf to get a preliminary rounded value with the correct number of significant figures
+            rounded_val = round_to_sf(val, significant)
+
+            # Now determine how many decimal places should be shown
+            if val < 1:
+                # Values less than 1 should have at least 2 decimal places
                 dec_places = max(2, significant - int(floor(log10(abs(val)))) - 1)
-            elif 1 <= val < 10:
-                # For 1 <= val < 10, always show 1 decimal place
+            elif val < 10:
+                # Values between 1 and 10 should have at least 1 decimal place
                 dec_places = 1
             else:
-                # For val >= 10, use round_to_sf
-                rounded_val = round_to_sf(val, significant)
-                # Ensure the type is float before calling is_integer
-                return str(int(rounded_val)) if float(rounded_val).is_integer() else str(rounded_val)
+                # Values greater than or equal to 10 should have decimal places based on the significant figures
+                dec_places = significant - int(floor(log10(rounded_val))) - 1
 
-            rounded_val = round(val, dec_places)
+            # For val >= 10, do not show decimal places if the rounded value is an integer
+            if rounded_val >= 10 and float(rounded_val).is_integer():
+                return str(int(rounded_val))
 
-        # Formatting
-        if type_of_value == "EC50":
-            # Ensure that the rounded_val has the correct number of decimal places by formatting it as a string.
-            rounded_val_str = f"{rounded_val:.{dec_places}f}"
-            # When rounded_val is 10 or greater, do not show decimal places
-            if rounded_val >= 10:
-                rounded_val_str = f"{int(rounded_val)}"
+            # Formatting the rounded value with the determined number of decimal places
+            rounded_val_str = f"{rounded_val:.{dec_places}f}" if dec_places > 0 else f"{int(rounded_val)}"
             return rounded_val_str
-
-        return str(rounded_val)
 
     except ValueError:  # Catch non-numeric values
         if type_of_value == "EC50":
@@ -283,7 +269,7 @@ def custom_text(data_min, data_max, cmap) -> dict[tuple, dict[str, str]]:
     # Modify specific cells based on modify_dict
     modifications = {  # Sample dictionary for testing
         # (0, 1): {"color": "#FF0000", "text": "NewText1"},
-        # (1, 3): {"color": get_color_from_value(4, data_min, data_max, cmap), "text": "NewText2"}
+        # (1, 0): {"color": get_color_from_value(4, data_min, data_max, cmap), "text": "~1,000\n~6"}
     }
 
     # Convert RGB colors to hex format if they are not already in hex
