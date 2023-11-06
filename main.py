@@ -13,8 +13,8 @@ files = [
 
 def create_heatmap(file_list, significant_digits=2, pec50_empty="<5", ec50_empty=">10,000") -> None:
     for file in file_list:
-        df_color, df_info = read_and_prepare_data(file, significant_digits, pec50_empty, ec50_empty)
-        fig, ax = plot_heatmap(df_color, df_info)
+        df_color, df_info, pEC50_numeric = read_and_prepare_data(file, significant_digits, pec50_empty, ec50_empty)
+        fig, ax = plot_heatmap(df_color, df_info, pEC50_numeric)
         output_path = file.replace(".csv", "_heatmap.png")
         save_and_show(fig, output_path)
 
@@ -80,7 +80,6 @@ def round_it(val, type_of_value, significant, pec50_empty, ec50_empty):
             return ""
 
 
-
 def text_color_for_bg(bg_color):
     if bg_color == "#000000":  # Assuming 'none' is the color passed for NaN cells
         bg_color = "#D3D3D3"
@@ -138,10 +137,10 @@ def read_and_prepare_data(file_path, significant_digits, pec50_empty, ec50_empty
         data_info, columns=["SST1", "SST2", "SST3", "SST4", "SST5"], index=compounds
     )
 
-    return df_color, df_info
+    return df_color, df_info, pEC50_numeric
 
 
-def plot_heatmap(df_color, df_info):
+def plot_heatmap(df_color, df_info, pEC50_numeric):
     # Calculate figure height based on number of rows
     n_rows = df_color.shape[0]
     row_height = 16 / 24
@@ -198,7 +197,13 @@ def plot_heatmap(df_color, df_info):
         for r, g, b, _ in colors_rgb
     ]
 
-    modify_dict = custom_text()
+    # Get the minimum and maximum pEC50 values used for the heatmap
+    data_min = np.nanmin(pEC50_numeric)
+    data_max = np.nanmax(pEC50_numeric)
+
+    # Modify the heatmap with custom text and color.
+    modify_dict = custom_text(data_min, data_max, cmap)
+
 
     # Create a mask based on modify_dict to skip annotations
     mask = np.zeros(df_info.shape, dtype=bool)
@@ -254,17 +259,38 @@ def modify_cells(ax, modify_dict):
         ax.axhline(y=i, color='black', linewidth=2)
 
 
-def custom_text() -> dict[tuple, dict[str, str]]:
+def custom_text(data_min, data_max, cmap) -> dict[tuple, dict[str, str]]:
     """
     Specify text and color for given cells.
     Cells are referenced by a tuple with Y, X coordinates (first index is row, second is column)
+    In the 'modifications' dictionary, use:
+        (0, 1): {"color": "#FF0000", "text": "NewText1"}
+    to manually add both text and color (in HEX format), or
+        (1, 3): {"color": get_color_from_value(4, data_min, data_max, cmap), "text": "NewText2"}
+    To give a number value (4 in this case) to automatically color by the color to that number in the heatmap.
     """
+
+    def get_color_from_value(value, vmin, vmax, colormap):
+        if isinstance(value, (int, float)):  # Check if the value is a number
+            # Normalize the value to the range of the data
+            normalized = (value - vmin) / (vmax - vmin)
+            normalized = max(min(normalized, 1), 0)  # Clamp between 0 and 1
+            # Get the corresponding color from the colormap
+            return colormap(normalized)
+        else:
+            return value  # Return the value unchanged if it's not a number
 
     # Modify specific cells based on modify_dict
     modifications = {  # Sample dictionary for testing
         # (0, 1): {"color": "#FF0000", "text": "NewText1"},
-        # (1, 3): {"color": "#00FF00", "text": "NewText2"}
+        # (1, 3): {"color": get_color_from_value(4, data_min, data_max, cmap), "text": "NewText2"}
     }
+
+    # Convert RGB colors to hex format if they are not already in hex
+    for cell, modification in modifications.items():
+        color = modification["color"]
+        if isinstance(color, tuple):  # If the color is an RGB tuple
+            modification["color"] = '#{:02x}{:02x}{:02x}'.format(int(color[0] * 255), int(color[1] * 255), int(color[2] * 255))
 
     return modifications
 
