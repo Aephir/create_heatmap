@@ -4,12 +4,12 @@ Repository:  https://github.com/Aephir/create_heatmap
 Version:     2.0.0
 
 Generates heatmap images from a csv file with data in the format:
-    5 different columns with 3 sub-columns in each (plus one column for row names). E.g., 5 receptors or targets.
+    Any number of columns with 3 sub-columns in each (plus one column for row names).
     The 3 sub-columns should have:
         1) pEC50 value as a float or integer.
         2) Error range (± CI95, SEM, etc.) as a float or integer.
         3) Number of independent repeats (n) as an integer.
-    Rows as needed (e.g., different compounds of conditions) with row names in the first column. No column headers.
+    Rows as needed (e.g., different compounds or conditions) with row names in the first column. No column headers.
 Parameters that can be adjusted are in the "adjustable_parameters" dictionary.
 Current options are:
     1) "files": A list of the files cvs you want to create heatmaps from.
@@ -27,11 +27,11 @@ Current options are:
             (23, 4) means index=23, column=4, so 24th row, fifth column.
         You can give the "color" parameter either as a HEX value color code (e.g., "#000000" for black)
         or as a numeric value where the color will become the closest available in the current heatmap.
-        E.g., giving a value of 6 where the heatmap values/colors range is 5–9 will ive the color corresponding to 6
+        E.g., giving a value of 6 where the heatmap values/colors range is 5–9 will give the color corresponding to 6
         A value of 4 in the same heatmap will ive the color corresponding to 5 (closest to 6 available)
-    6) "font_settings": settings for the font type, size, and weight (e.g., "normal", "bold") to use
-    7) "show_plot": Show the plot after the script is done (as opposed to just saving the file)
-    8) "save_as_type": Which types o files should be saved. Current options are "png" and "pdf".
+    7) "font_settings": settings for the font type, size, and weight (e.g., "normal", "bold") to use
+    8) "show_plot": Show the plot after the script is done (as opposed to just saving the file)
+    9) "save_as_type": Which types o files should be saved. Current options are "png" and "pdf".
 """
 
 import numpy as np
@@ -47,7 +47,7 @@ from pandas import DataFrame
 # Adjustable parameters
 parameters = {
     "files": [
-        "data/fj1_analogs_ci95.csv",
+        "data/example.csv"
     ],
     "significant_digits": 2,
     "column_names": ["SST1", "SST2", "SST3", "SST4", "SST5"],
