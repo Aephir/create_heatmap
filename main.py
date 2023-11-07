@@ -47,8 +47,8 @@ from pandas import DataFrame
 # Adjustable parameters
 parameters = {
     "files": [
-        "data/fj1_analogs_ci95.csv",
-        # "data/example.csv"
+        # "data/fj1_analogs_ci95.csv",
+        "data/example.csv"
     ],
     "significant_digits": 2,
     "column_names": ["SST1", "SST2", "SST3", "SST4", "SST5"],
