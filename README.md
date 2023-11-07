@@ -65,4 +65,4 @@ Which types o files should be saved. Current options are "png" and "pdf".
 
 
 ## Known limitations
-- Background "color" for empty cells is "clear", and there is a white "plus" through the cells. While this does not matter i exporting a png and displaying on white background, it limits other uses.
+- Background "color" for empty cells is "clear", and there is a white "plus" through the cells. While this does not matter if exporting a png and displaying on white background, it limits other uses.
