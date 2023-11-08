@@ -5,7 +5,7 @@ This is a script to create heatmaps for publications.
 This is an example for how it can look generated from the date in "data/example.csv".
 ![Heatmap Example](https://github.com/Aephir/create_heatmap/blob/main/data/example_heatmap.png?raw=true)
 
-In the current version (v2.0.0), the following has been implemented:
+In the current version (v2.0.1), the following has been implemented:
 
 Generating heatmap images from a csv file with data divided in sets of 3 sub-columns for each (plus one column for row names).
 
@@ -44,15 +44,15 @@ Allow custom color and text for specified cells. Use case could be:
 
 The tuple (e.g., (0, 1)) determines the location in the heatmap to change (index, column).
 
-_Remember to start counting at 0!_.
+__*Remember to start counting at 0!*__.
 
 For example:
 - (0, 1) means index=0 (or row=0), column=1, so first rw, second column.
 - (23, 4) means index=23, column=4, so 24th row, fifth column.
 
-You can give the "color" parameter either as a HEX value color code (e.g., "#000000" for black) or as a numeric value where the color will become the closest available in the current heatmap.
+You supply a numeric value as the 'color' variable, that will act as if that value was in your dataset, 
 
-E.g., giving a value of 6 where the heatmap values/colors range is 5–9 will give the color corresponding to 6. A value of 4 in the same heatmap will ive the color corresponding to 5 (closest to 6 available)
+You supply any string as the 'text' variable, that will be printed in the corresponding cell. Remember, 'backlash + n' `\n` is a "new line" character to have your text on two lines.  
 
 ### font_settings
 Settings for the font type, size, and weight (e.g., "normal", "bold") to use

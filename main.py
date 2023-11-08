@@ -1,7 +1,7 @@
 """
 Author:      @Aephir (Walden Bjørn-Yoshimoto)
 Repository:  https://github.com/Aephir/create_heatmap
-Version:     2.0.0
+Version:     2.0.1
 
 Generates heatmap images from a csv file with data in the format:
     Any number of columns with 3 sub-columns in each (plus one column for row names).
@@ -25,10 +25,7 @@ Current options are:
         Remember to start counting at 0. For example:
             (0, 1) means index=0 (or row=0), column=1, so first rw, second column.
             (23, 4) means index=23, column=4, so 24th row, fifth column.
-        You can give the "color" parameter either as a HEX value color code (e.g., "#000000" for black)
-        or as a numeric value where the color will become the closest available in the current heatmap.
-        E.g., giving a value of 6 where the heatmap values/colors range is 5–9 will give the color corresponding to 6
-        A value of 4 in the same heatmap will ive the color corresponding to 5 (closest to 6 available)
+        You supply a numeric value that will act as if that value was in your dataset.
     7) "font_settings": settings for the font type, size, and weight (e.g., "normal", "bold") to use
     8) "show_plot": Show the plot after the script is done (as opposed to just saving the file)
     9) "save_as_type": Which types o files should be saved. Current options are "png" and "pdf".
@@ -47,18 +44,18 @@ from pandas import DataFrame
 # Adjustable parameters
 parameters = {
     "files": [
-        # "data/fj1_analogs_ci95.csv",
-        "data/example.csv"
+        "data/fj1_analogs_ci95.csv",
+        # "data/example.csv"
     ],
     "significant_digits": 2,
     "column_names": ["SST1", "SST2", "SST3", "SST4", "SST5"],
     "pec50_empty": "<5",
     "ec50_empty": ">10,000",
     "modifications": {  # Uncomment line(s) below and add values if/as needed
-        # (0, 1): {"color": "#FF0000", "text": "Super\nModified"},
-        # (1, 0): {"color": 4, "text": "~100,000\n~4"},
-        # (23, 0): {"color": 9, "text": "~1\n~9"},
-        # (23, 3): {"color": 6, "text": "~1,000\n~6"},
+        # (0, 1): {"color": "#FF0000", "text": "Super\nModified"},  # This version is not currently working!
+        (1, 0): {"color": 3, "text": "~1,000\n~4"},
+        (23, 0): {"color": 5.3, "text": ">1,000\n<6"},
+        (23, 3): {"color": 5.8, "text": ">1,000\n<6"},
     },
     "font_settings": {'font': 'Open Sans', 'size': 12, 'weight': 'normal'},
     "show_plot": True,
@@ -87,7 +84,8 @@ class HeatmapGenerator:
         """
         for file in self.files:
             df_color, df_info, pec50_numeric = self.read_and_prepare_data(file)
-            fig, ax = self.plot_heatmap(df_color, df_info, pec50_numeric)
+            df_color_modified, df_info_modified = self.replace_values(df_color, df_info)
+            fig, ax = self.plot_heatmap(df_color_modified, df_info_modified, pec50_numeric)
             output_path = file.replace(".csv", "_heatmap")
             self.save_and_show(fig, output_path)
 
@@ -207,6 +205,15 @@ class HeatmapGenerator:
         )
 
         return df_color, df_info, pec50_numeric
+
+    def replace_values(self, df_color, df_info):
+        # self.modifications
+
+        for cell_coords, mod_details in self.modifications.items():
+            df_color.iat[cell_coords] = mod_details['color']
+            df_info.iat[cell_coords] = mod_details['text']
+        return df_color, df_info
+
 
     @staticmethod
     def create_colormap():
