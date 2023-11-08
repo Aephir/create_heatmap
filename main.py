@@ -53,7 +53,7 @@ parameters = {
     "ec50_empty": ">10,000",
     "modifications": {  # Uncomment line(s) below and add values if/as needed
         # (0, 1): {"color": "#FF0000", "text": "Super\nModified"},  # This version is not currently working!
-        (1, 0): {"color": 3, "text": "~1,000\n~4"},
+        (1, 0): {"color": 3, "text": ">1,000\n<6"},
         (23, 0): {"color": 5.3, "text": ">1,000\n<6"},
         (23, 3): {"color": 5.8, "text": ">1,000\n<6"},
     },
@@ -410,10 +410,10 @@ class HeatmapGenerator:
     def save_and_show(self, fig, output_path):
         saved_files = []
         if "png" in self.save_as_type:
-            plt.savefig(output_path + ".png", bbox_inches="tight")
+            plt.savefig(output_path + ".png", transparent=True, bbox_inches="tight")
             saved_files.append(output_path + ".png")
         if "pdf" in self.save_as_type:
-            fig.savefig(output_path + ".pdf", format="pdf", bbox_inches="tight")
+            fig.savefig(output_path + ".pdf", format="pdf", transparent=True, bbox_inches="tight")
             saved_files.append(output_path + ".pdf")
         if self.show:
             plt.show()
