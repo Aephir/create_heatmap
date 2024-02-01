@@ -5,7 +5,7 @@ This is a script to create heatmaps for publications.
 This is an example for how it can look generated from the date in "data/example.csv".
 ![Heatmap Example](https://github.com/Aephir/create_heatmap/blob/main/data/example_heatmap.png?raw=true)
 
-In the current version (v2.0.1), the following has been implemented:
+In the current version (v2.0.5), the following has been implemented:
 
 Generating heatmap images from a csv file with data divided in sets of 3 sub-columns for each (plus one column for row names).
 
@@ -22,6 +22,7 @@ Parameters that can be adjusted are in the "adjustable_parameters" dictionary. C
 
 ### files
 A list of the files cvs you want to create heatmaps from.
+Hint: Currently it prompts you for which experiment to calculate from. This will select the correct file (if keeping Excel file names as indicated in the script)
 
 ### significant_digits
 The number of significant digits to use (NOT significant decimals)
@@ -63,6 +64,9 @@ Show the plot after the script is done (as opposed to just saving the file)
 ### save_as_type
 Which types o files should be saved. Current options are "png" and "pdf".
 
+### Custom text and color for specific cells
+This is set in the `const.py` file. Usefull for when you have incomplete curves and want to show that EC50 is above or approximate.
+Hint: Currently it prompts you for which experiment to calculate from. This will select the correct variable to import from `const.py`, as long as you edit the variable to fit your data.
 
 ## Known limitations
 - Background "color" for empty cells is "clear", and there is a white "plus" through the cells. While this does not matter if exporting a png and displaying on white background, it limits other uses.

@@ -1,7 +1,7 @@
 """
 Author:      @Aephir (Walden Bjørn-Yoshimoto)
 Repository:  https://github.com/Aephir/create_heatmap
-Version:     2.0.1
+Version:     2.0.5
 
 Generates heatmap images from a csv file with data in the format:
     Any number of columns with 3 sub-columns in each (plus one column for row names).
@@ -28,7 +28,7 @@ Current options are:
         You supply a numeric value that will act as if that value was in your dataset.
     7) "font_settings": settings for the font type, size, and weight (e.g., "normal", "bold") to use
     8) "show_plot": Show the plot after the script is done (as opposed to just saving the file)
-    9) "save_as_type": Which types o files should be saved. Current options are "png" and "pdf".
+    9) "save_as_type": Which types of files should be saved. Current options are "png" and "pdf".
 """
 
 import numpy as np
@@ -40,24 +40,41 @@ from math import log10, floor
 from typing import Any, Union
 from numpy import ndarray, dtype
 from pandas import DataFrame
+from const import (
+    SUBSTITUTE_SCREEN,
+    SUBSTITUTE_ANALOGS
+)
+
+datasets = {
+    'screen': ['data/consomatin_screen_ci95.csv', SUBSTITUTE_SCREEN],
+    'analogs': ['data/fj1_analogs_ci95.csv', SUBSTITUTE_ANALOGS]
+}
+user_input = input('Which dataset do you want to use?\n\n[1] Screen\n[2] Analogs\n\n')
+if int(user_input) == 1:
+    dataset = 'screen'
+elif int(user_input) == 2:
+    dataset = 'analogs'
+else:
+    print(f'"{user_input}" is not a valid selection. Terminating.')
+    quit()
 
 # Adjustable parameters
 parameters = {
     "files": [
-        "data/fj1_analogs_ci95.csv",
-        # "data/example.csv"
+        datasets[dataset][0]
     ],
     "significant_digits": 2,
     "column_names": ["SST1", "SST2", "SST3", "SST4", "SST5"],
     "pec50_empty": "<5",
     "ec50_empty": ">10,000",
-    "modifications": {  # Uncomment line(s) below and add values if/as needed
-        # (0, 1): {"color": "#FF0000", "text": "Super\nModified"},  # This version is not currently working!
-        (1, 0): {"color": 3, "text": ">1,000\n<6"},
-        (23, 0): {"color": 5.3, "text": ">1,000\n<6"},
-        (23, 3): {"color": 5.8, "text": ">1,000\n<6"},
-    },
-    "font_settings": {'font': 'Open Sans', 'size': 12, 'weight': 'normal'},
+    "modifications": datasets[dataset][1],
+        # {  # Uncomment line(s) below and add values if/as needed
+        # # (0, 1): {"color": "#FF0000", "text": "Super\nModified"},  # This version is not currently working!
+        # (1, 1): {"color": 6, "text": ">1,000\n<6"},  # Fj1 @ SST1
+        # (23, 0): {"color": 5.3, "text": ">1,000\n<6"},  # TT-232 @ SST1
+        # (23, 3): {"color": 5.8, "text": ">1,000\n<6"},  # TT-232 @ SST4
+        # },
+    "font_settings": {'font': 'Arial', 'size': 12, 'weight': 'normal'},
     "show_plot": True,
     "save_as_type": ["pdf", "png"]  # available options are currently "pdf" and "png".
 }
@@ -79,9 +96,7 @@ class HeatmapGenerator:
         self.save_as_type = adjustable_parameters["save_as_type"]
 
     def create_heatmaps(self) -> None:
-        """
-        Main method to create heatmap.
-        """
+        """Main method to create heatmap"""
         for file in self.files:
             df_color, df_info, pec50_numeric = self.read_and_prepare_data(file)
             df_color_modified, df_info_modified = self.replace_values(df_color, df_info)
@@ -214,7 +229,6 @@ class HeatmapGenerator:
             df_info.iat[cell_coords] = mod_details['text']
         return df_color, df_info
 
-
     @staticmethod
     def create_colormap():
         colors = ["#363636", "#4D91BE", "#F8CD3D"]
@@ -342,7 +356,7 @@ class HeatmapGenerator:
     def plot_heatmap(self, df_color, df_info, pec50_numeric):
         cmap = self.create_colormap()
         fig_height = self.calculate_figure_dimensions(df_color.shape[0])
-        sns.set(font="Open Sans")
+        sns.set(font="Arial")
         fig, ax = plt.subplots(figsize=(10, fig_height))
 
         self.draw_heatmap(df_color, ax, cmap)
