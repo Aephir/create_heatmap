@@ -5,7 +5,7 @@ This is a script to create heatmaps for publications.
 This is an example for how it can look generated from the date in "data/example.csv".
 ![Heatmap Example](https://github.com/Aephir/create_heatmap/blob/main/data/example_heatmap.png?raw=true)
 
-In the current version (v2.0.5), the following has been implemented:
+In the current version (v2.0.6), the following has been implemented:
 
 Generating heatmap images from a csv file with data divided in sets of 3 sub-columns for each (plus one column for row names).
 

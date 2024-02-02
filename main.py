@@ -1,7 +1,7 @@
 """
 Author:      @Aephir (Walden Bjørn-Yoshimoto)
 Repository:  https://github.com/Aephir/create_heatmap
-Version:     2.0.5
+Version:     2.0.6
 
 Generates heatmap images from a csv file with data in the format:
     Any number of columns with 3 sub-columns in each (plus one column for row names).
